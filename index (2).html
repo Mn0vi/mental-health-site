@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>منصة الصحة النفسية</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:'Cairo',Arial;
+margin:0;
+background:linear-gradient(135deg,#e0f2fe,#fce7f3);
+text-align:center;
+transition:0.4s;
+}
+
+.dark{background:#0f172a;color:white;}
+
+h1{font-size:40px;}
+h2{font-size:28px;}
+
+section{
+background:white;
+margin:20px auto;
+padding:25px;
+border-radius:20px;
+width:85%;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+transition:0.3s;
+}
+
+section:hover{transform:translateY(-5px);}
+
+.dark section{background:#1e293b;}
+
+button{
+padding:12px 20px;
+margin:10px;
+font-size:18px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,#3b82f6,#2563eb);
+color:white;
+cursor:pointer;
+}
+
+button:hover{transform:scale(1.05);}
+
+input{
+padding:10px;
+margin:10px;
+border-radius:10px;
+}
+
+#bar{
+height:25px;
+background:linear-gradient(90deg,#22c55e,#16a34a);
+width:0%;
+border-radius:10px;
+}
+
+.good{color:#22c55e;}
+.medium{color:#f59e0b;}
+.bad{color:#ef4444;}
+
+#certificate{
+display:none;
+border:2px dashed #3b82f6;
+padding:20px;
+border-radius:15px;
+margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- تسجيل الدخول -->
+<div id="login">
+<h1>💙 منصة الصحة النفسية</h1>
+<p>اهتم بنفسك… لأنك تستحق الأفضل</p>
+
+<input id="name" placeholder="اسمك">
+<input id="age" placeholder="عمرك">
+
+<br>
+<button onclick="login()">دخول</button>
+</div>
+
+<!-- الموقع -->
+<div id="main" style="display:none">
+
+<h2 id="welcome"></h2>
+<p id="points">النقاط: 0</p>
+
+<button onclick="toggleDark()">🌙 الوضع الليلي</button>
+<button onclick="logout()">تسجيل خروج</button>
+
+<section>
+<h2>🧠 الاستبيان</h2>
+
+<p id="qNum"></p>
+<p id="question"></p>
+
+<div id="answers"></div>
+
+<button onclick="next()" id="nextBtn" style="display:none">التالي</button>
+
+<div style="background:#ddd;border-radius:10px">
+<div id="bar"></div>
+</div>
+
+<p id="result"></p>
+
+<canvas id="chart" width="300"></canvas>
+
+<div id="certificate">
+<h2>🏆 شهادة إتمام</h2>
+<p id="cert"></p>
+<button onclick="window.print()">🖨️ طباعة الشهادة</button>
+</div>
+
+</section>
+
+<section>
+<h2>🎯 هدفك</h2>
+<input id="goal">
+<button onclick="setGoal()">حفظ</button>
+<p id="goalText"></p>
+</section>
+
+<section>
+<h2>😄 حالتك اليوم</h2>
+<button onclick="mood('سعيد 😄')">سعيد</button>
+<button onclick="mood('عادي 😐')">عادي</button>
+<button onclick="mood('حزين 😔')">حزين</button>
+<p id="moodResult"></p>
+</section>
+
+<section>
+<h2>🧘 تمرين استرخاء</h2>
+<button onclick="timer()">ابدأ</button>
+<p id="timerText"></p>
+</section>
+
+<section>
+<h2>💡 نصيحة</h2>
+<button onclick="tip()">اعرض</button>
+<p id="tipText"></p>
+</section>
+
+<section>
+<h2>💬 اقتباس</h2>
+<button onclick="quote()">اعرض</button>
+<p id="quoteText"></p>
+</section>
+
+</div>
+
+<script>
+
+let user="";
+let current=0;
+let score=0;
+let points=0;
+
+// تسجيل الدخول (مصَحّح)
+function login(){
+
+let n = document.getElementById("name").value;
+let a = document.getElementById("age").value;
+
+if(n=="" || a==""){
+alert("اكتب اسمك وعمرك");
+return;
+}
+
+user=n;
+
+document.getElementById("login").style.display="none";
+document.getElementById("main").style.display="block";
+
+document.getElementById("welcome").innerHTML="مرحباً "+user+" 👋";
+
+load();
+}
+
+// الأسئلة
+let questions=[
+"هل تشعر بالسعادة؟","هل تنام جيداً؟","هل مرتاح؟",
+"هل عندك طاقة؟","هل تستمتع؟","هل تثق بنفسك؟",
+"هل عندك أصدقاء؟","هل مرتاح ذهنياً؟","هل إيجابي؟",
+"هل تتحكم بمشاعرك؟","هل عندك أهداف؟","هل متحفز؟",
+"هل راضي؟","هل هادئ؟","هل متوازن؟"
+];
+
+function load(){
+document.getElementById("qNum").innerHTML="السؤال "+(current+1)+" من 15";
+document.getElementById("question").innerHTML=questions[current];
+
+document.getElementById("answers").innerHTML=`
+<button onclick="answer(2)">نعم</button>
+<button onclick="answer(1)">أحياناً</button>
+<button onclick="answer(0)">لا</button>
+`;
+
+document.getElementById("nextBtn").style.display="none";
+}
+
+function answer(v){
+score+=v;
+points+=10;
+document.getElementById("points").innerHTML="النقاط: "+points;
+document.getElementById("nextBtn").style.display="inline";
+}
+
+function next(){
+current++;
+document.getElementById("bar").style.width=(current/15*100)+"%";
+
+if(current<15){load();}
+else{finish();}
+}
+
+function finish(){
+
+let percent=Math.round(score/30*100);
+
+let text="";
+let analysis="";
+
+if(percent>=75){
+text="ممتازة";
+analysis="أنت بحالة ممتازة 👏";
+}
+else if(percent>=50){
+text="جيدة";
+analysis="حالتك جيدة لكن تحتاج تحسين";
+}
+else{
+text="تحتاج تحسين";
+analysis="حاول تهتم بنفسك أكثر 💙";
+}
+
+document.getElementById("result").innerHTML=
+"النتيجة: "+text+"<br>"+percent+"%<br>"+analysis;
+
+document.getElementById("certificate").style.display="block";
+document.getElementById("cert").innerHTML=
+"الطالب: "+user+"<br>"+percent+"%<br>"+new Date().toLocaleDateString();
+
+drawChart(percent);
+}
+
+// رسم بياني
+function drawChart(p){
+new Chart(document.getElementById("chart"),{
+type:'doughnut',
+data:{
+labels:["الصحة النفسية","المتبقي"],
+datasets:[{data:[p,100-p]}]
+}
+});
+}
+
+// باقي الميزات
+function setGoal(){
+document.getElementById("goalText").innerHTML="هدفك: "+goal.value+" 🎯";
+}
+
+function mood(m){
+document.getElementById("moodResult").innerHTML="حالتك: "+m;
+}
+
+function timer(){
+let t=10;
+let x=setInterval(()=>{
+document.getElementById("timerText").innerHTML="استرخ... "+t;
+t--;
+if(t<0){clearInterval(x);timerText.innerHTML="انتهى 🌿";}
+},1000);
+}
+
+function tip(){
+let tips=["نم جيداً","مارس الرياضة","تنفس بعمق","استرخ","تحدث مع صديق"];
+document.getElementById("tipText").innerHTML=
+tips[Math.floor(Math.random()*tips.length)];
+}
+
+function quote(){
+let quotes=["أنت قوي","لا تستسلم","ابدأ من جديد","ثق بنفسك"];
+document.getElementById("quoteText").innerHTML=
+quotes[Math.floor(Math.random()*quotes.length)];
+}
+
+function toggleDark(){
+document.body.classList.toggle("dark");
+}
+
+function logout(){
+location.reload();
+}
+
+</script>
+
+</body>
+</html>
