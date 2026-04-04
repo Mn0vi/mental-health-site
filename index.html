@@ -2,12 +2,13 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>منصة الصحة النفسيه</title>
+<title>منصة الصحة النفسية </title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 body{
 font-family:'Cairo';
 margin:0;
@@ -17,10 +18,29 @@ text-align:center;
 transition:0.5s;
 }
 
-.container{
-padding:20px;
+/* شاشة التحميل */
+#loadingScreen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#0f172a;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:999;
 }
 
+#loadBar{
+width:0%;
+height:10px;
+background:#3b82f6;
+margin-top:20px;
+}
+
+/* الكروت */
 .card{
 background:white;
 color:#333;
@@ -28,7 +48,7 @@ margin:15px;
 padding:20px;
 border-radius:20px;
 box-shadow:0 10px 25px rgba(0,0,0,0.2);
-animation:fade 0.6s;
+animation:fade 0.8s;
 }
 
 @keyframes fade{
@@ -54,24 +74,35 @@ margin:5px;
 }
 
 #bar{height:15px;background:lime;width:0%;border-radius:10px;}
+
 </style>
 </head>
 
 <body>
 
-<div class="container" id="login">
-<h1>💙 منصة الصحة النفسية</h1>
-<p id="quote"></p>
-<input id="name" placeholder="اسمك">
-<input id="age" placeholder="عمرك"><br>
-<button onclick="start()">ابدأ رحلتك 🚀</button>
+<!-- تحميل -->
+<div id="loadingScreen">
+<h1>💙 جاري تحميل تجربتك...</h1>
+<div id="loadBar"></div>
 </div>
 
-<div id="main" style="display:none" class="container">
+<!-- صوت -->
+<audio id="bgSound" src="https://www.soundjay.com/nature/sounds/rain-01.mp3"></audio>
+
+<!-- البداية -->
+<div id="login">
+<h1 style="font-size:50px">💙 منصة الصحة النفسية</h1>
+<p>ابدأ رحلتك نحو التوازن النفسي</p>
+<input id="name" placeholder="اسمك">
+<input id="age" placeholder="عمرك"><br>
+<button onclick="start()">🚀 ابدأ رحلتك</button>
+</div>
+
+<!-- الموقع -->
+<div id="main" style="display:none">
 
 <h2 id="welcome"></h2>
 <p id="timer"></p>
-<p id="level"></p>
 
 <button onclick="theme()">🎨 تغيير الشكل</button>
 
@@ -96,25 +127,19 @@ margin:5px;
 </div>
 
 <div class="card">
-<h2>📅 خطتك</h2>
-<ul id="plan"></ul>
-</div>
-
-<div class="card">
 <h2>🧘 تنفس</h2>
 <p id="breath"></p>
 <button onclick="breathing()">ابدأ</button>
 </div>
 
 <div class="card">
-<h2>💬 مستشارك</h2>
+<h2>💬 مستشار</h2>
 <button onclick="advisor()">نصيحة</button>
 <p id="adv"></p>
 </div>
 
 <div class="card">
 <h2>🎮 موقف</h2>
-<p>عندك اختبار مهم، وش تسوي؟</p>
 <button onclick="scenario(1)">أذاكر</button>
 <button onclick="scenario(2)">أتوتر</button>
 <p id="sc"></p>
@@ -136,36 +161,31 @@ margin:5px;
 </div>
 
 <div class="card">
-<h2>🎯 هدفك</h2>
-<input id="goal">
-<button onclick="saveGoal()">حفظ</button>
-<p id="goalText"></p>
-</div>
-
-<div class="card">
 <h2>🏆 إنجازات</h2>
 <p id="ach"></p>
-</div>
-
-<div class="card">
-<h2>📜 شهادة</h2>
-<p id="cert"></p>
-<button onclick="window.print()">طباعة</button>
 </div>
 
 </div>
 
 <script>
 
-let user="",i=0,score=0,points=0,startTime;
+/* تحميل */
+let load=0;
+let loader=setInterval(()=>{
+load+=10;
+document.getElementById("loadBar").style.width=load+"%";
+if(load>=100){
+clearInterval(loader);
+document.getElementById("loadingScreen").style.display="none";
+}
+},200);
+
+let user="",i=0,score=0,startTime;
 
 let questions=[
 "هل تنام جيداً؟","هل تتوتر؟","هل سعيد؟","هل تثق بنفسك؟",
 "هل لديك أصدقاء؟","هل تمارس الرياضة؟","هل تستخدم الجوال كثير؟",
-"هل تفكر كثيراً؟","هل تحب نفسك؟","هل مرتاح؟",
-"هل عندك هدف؟","هل تنام بدري؟","هل تضحك؟",
-"هل تتواصل؟","هل مضغوط؟","هل تركز؟",
-"هل تشعر بالقلق؟","هل تسترخي؟","هل تنظم وقتك؟","هل متفائل؟"
+"هل تفكر كثيراً؟","هل تحب نفسك؟","هل مرتاح؟"
 ];
 
 function start(){
@@ -174,16 +194,17 @@ login.style.display="none";
 main.style.display="block";
 welcome.innerHTML="مرحباً "+user;
 
+document.getElementById("bgSound").play();
+
 startTime=Date.now();
 setInterval(()=>{
 timer.innerHTML="⏱️ "+Math.floor((Date.now()-startTime)/1000)+" ثانية";
 },1000);
 
-load();
-quote();
+loadQ();
 }
 
-function load(){
+function loadQ(){
 q.innerHTML=questions[i];
 ans.innerHTML=`
 <button onclick="answer(2)">نعم</button>
@@ -192,35 +213,19 @@ ans.innerHTML=`
 `;
 }
 
-function answer(v){
-score+=v;
-points+=10;
-level.innerHTML="النقاط: "+points;
-}
+function answer(v){score+=v;}
 
 function next(){
 i++;
-bar.style.width=(i/20*100)+"%";
-if(i<20) load(); else finish();
+bar.style.width=(i/10*100)+"%";
+if(i<10) loadQ(); else finish();
 }
 
 function finish(){
-let p=Math.round(score/40*100);
-let old=localStorage.old||0;
+let p=Math.round(score/20*100);
+result.innerHTML="نتيجتك: "+p+"%";
+analysis.innerHTML=p<50?"⚠️ تحتاج تحسين":p<75?"🙂 جيد":"👏 ممتاز";
 
-result.innerHTML="نتيجتك: "+p+"%<br>السابق: "+old+"%";
-localStorage.old=p;
-
-analysis.innerHTML= p<50?"⚠️ تحتاج راحة": p<75?"🙂 جيد":"👏 ممتاز";
-
-draw(p);
-planGen();
-achieve(p);
-
-cert.innerHTML="شهادة: "+user+" - "+p+"%";
-}
-
-function draw(p){
 new Chart(chart,{type:'doughnut',
 data:{labels:["نتيجتك","الباقي"],datasets:[{data:[p,100-p]}]}});
 
@@ -229,12 +234,8 @@ type:'radar',
 data:{labels:["نوم","توتر","سعادة","ثقة","علاقات"],
 datasets:[{data:[p/2,p/3,p/2,p/2,p/2]}]}
 });
-}
 
-function planGen(){
-let arr=["رياضة","نوم","راحة","تواصل","مشي","تأمل"];
-plan.innerHTML="";
-arr.forEach(x=>plan.innerHTML+=`<li>${x}</li>`);
+ach.innerHTML=p>80?"🏆 ممتاز":"👍 استمر";
 }
 
 function breathing(){
@@ -247,12 +248,12 @@ if(c<0){clearInterval(t);breath.innerHTML="انتهى";}
 }
 
 function advisor(){
-let tips=["استرخي","اشرب ماء","نم جيداً","تواصل"];
+let tips=["استرخي","اشرب ماء","نم جيداً"];
 adv.innerHTML=tips[Math.floor(Math.random()*tips.length)];
 }
 
 function scenario(x){
-sc.innerHTML= x==1?"👏 ممتاز":"⚠️ حاول تهدأ";
+sc.innerHTML=x==1?"👏 ممتاز":"⚠️ حاول تهدأ";
 }
 
 function mood(m){
@@ -267,21 +268,8 @@ localStorage.note=note.value;
 notes.innerHTML=note.value;
 }
 
-function saveGoal(){
-goalText.innerHTML=goal.value;
-}
-
-function achieve(p){
-ach.innerHTML= p>80?"🏆 بطل":"👍 استمر";
-}
-
 function theme(){
 document.body.style.background="linear-gradient(135deg,#f472b6,#60a5fa)";
-}
-
-function quote(){
-let q=["ابدأ يومك بإيجابية","أنت قوي","لا تستسلم"];
-document.getElementById("quote").innerHTML=q[Math.floor(Math.random()*q.length)];
 }
 
 </script>
