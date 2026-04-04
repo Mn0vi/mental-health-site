@@ -2,133 +2,170 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>منصة الصحة النفسية المتقدمة</title>
+<title>منصة الصحة النفسيه</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
 font-family:'Cairo';
-background:linear-gradient(135deg,#dbeafe,#fce7f3);
-text-align:center;
 margin:0;
+background:linear-gradient(135deg,#0ea5e9,#a78bfa);
+color:white;
+text-align:center;
+transition:0.5s;
 }
 
-section{
+.container{
+padding:20px;
+}
+
+.card{
 background:white;
-margin:20px;
+color:#333;
+margin:15px;
 padding:20px;
 border-radius:20px;
-box-shadow:0 10px 20px rgba(0,0,0,0.1);
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+animation:fade 0.6s;
+}
+
+@keyframes fade{
+from{opacity:0; transform:translateY(20px);}
+to{opacity:1;}
 }
 
 button{
-padding:10px;
+padding:10px 20px;
 margin:5px;
 border:none;
 border-radius:10px;
-background:#2563eb;
+background:#6366f1;
 color:white;
+cursor:pointer;
 }
 
-#bar{height:20px;background:green;width:0%;}
+input,textarea{
+padding:10px;
+border-radius:10px;
+border:1px solid #ccc;
+margin:5px;
+}
+
+#bar{height:15px;background:lime;width:0%;border-radius:10px;}
 </style>
 </head>
 
 <body>
 
-<div id="login">
+<div class="container" id="login">
 <h1>💙 منصة الصحة النفسية</h1>
+<p id="quote"></p>
 <input id="name" placeholder="اسمك">
 <input id="age" placeholder="عمرك"><br>
-<button onclick="start()">ابدأ</button>
+<button onclick="start()">ابدأ رحلتك 🚀</button>
 </div>
 
-<div id="main" style="display:none">
+<div id="main" style="display:none" class="container">
 
 <h2 id="welcome"></h2>
+<p id="timer"></p>
+<p id="level"></p>
 
-<section>
-<h2>🧠 الاستبيان</h2>
+<button onclick="theme()">🎨 تغيير الشكل</button>
+
+<div class="card">
+<h2>🧠 الاختبار</h2>
 <p id="q"></p>
 <div id="ans"></div>
 <button onclick="next()">التالي</button>
 <div style="background:#ddd"><div id="bar"></div></div>
-</section>
+</div>
 
-<section>
-<h2>📊 النتيجة والتحليل</h2>
+<div class="card">
+<h2>📊 النتائج</h2>
 <p id="result"></p>
 <canvas id="chart"></canvas>
-</section>
+<canvas id="radar"></canvas>
+</div>
 
-<section>
-<h2>📋 تقريرك</h2>
-<p id="report"></p>
-</section>
+<div class="card">
+<h2>📋 التحليل</h2>
+<p id="analysis"></p>
+</div>
 
-<section>
-<h2>📅 خطة أسبوعية</h2>
+<div class="card">
+<h2>📅 خطتك</h2>
 <ul id="plan"></ul>
-</section>
+</div>
 
-<section>
-<h2>🧘 تمرين تنفس</h2>
-<p id="breath">اضغط لبدء</p>
+<div class="card">
+<h2>🧘 تنفس</h2>
+<p id="breath"></p>
 <button onclick="breathing()">ابدأ</button>
-</section>
+</div>
 
-<section>
-<h2>💬 مستشار ذكي</h2>
+<div class="card">
+<h2>💬 مستشارك</h2>
 <button onclick="advisor()">نصيحة</button>
 <p id="adv"></p>
-</section>
+</div>
 
-<section>
-<h2>🎮 موقف تفاعلي</h2>
-<p>أنت متوتر قبل اختبار، ماذا تفعل؟</p>
+<div class="card">
+<h2>🎮 موقف</h2>
+<p>عندك اختبار مهم، وش تسوي؟</p>
 <button onclick="scenario(1)">أذاكر</button>
 <button onclick="scenario(2)">أتوتر</button>
-<p id="scenarioResult"></p>
-</section>
+<p id="sc"></p>
+</div>
 
-<section>
+<div class="card">
 <h2>😄 حالتك</h2>
 <button onclick="mood('😄')">سعيد</button>
 <button onclick="mood('😐')">عادي</button>
 <button onclick="mood('😔')">حزين</button>
 <p id="moods"></p>
-</section>
+</div>
 
-<section>
+<div class="card">
 <h2>📝 ملاحظات</h2>
 <textarea id="note"></textarea>
 <button onclick="saveNote()">حفظ</button>
 <p id="notes"></p>
-</section>
+</div>
 
-<section>
+<div class="card">
+<h2>🎯 هدفك</h2>
+<input id="goal">
+<button onclick="saveGoal()">حفظ</button>
+<p id="goalText"></p>
+</div>
+
+<div class="card">
 <h2>🏆 إنجازات</h2>
 <p id="ach"></p>
-</section>
+</div>
 
-<section>
-<h2>💡 هل تعلم؟</h2>
-<p id="fact"></p>
-</section>
+<div class="card">
+<h2>📜 شهادة</h2>
+<p id="cert"></p>
+<button onclick="window.print()">طباعة</button>
+</div>
 
 </div>
 
 <script>
 
-let user="",i=0,score=0;
+let user="",i=0,score=0,points=0,startTime;
+
 let questions=[
-"هل تنام جيداً؟","هل تشعر بالتوتر؟","هل سعيد؟","هل تثق بنفسك؟",
+"هل تنام جيداً؟","هل تتوتر؟","هل سعيد؟","هل تثق بنفسك؟",
 "هل لديك أصدقاء؟","هل تمارس الرياضة؟","هل تستخدم الجوال كثير؟",
-"هل تفكر كثيراً؟","هل تحب نفسك؟","هل تشعر بالراحة؟",
-"هل لديك هدف؟","هل تنام مبكراً؟","هل تضحك كثيراً؟",
-"هل تتواصل مع الآخرين؟","هل تشعر بالضغط؟"
+"هل تفكر كثيراً؟","هل تحب نفسك؟","هل مرتاح؟",
+"هل عندك هدف؟","هل تنام بدري؟","هل تضحك؟",
+"هل تتواصل؟","هل مضغوط؟","هل تركز؟",
+"هل تشعر بالقلق؟","هل تسترخي؟","هل تنظم وقتك؟","هل متفائل؟"
 ];
 
 function start(){
@@ -136,9 +173,14 @@ user=name.value;
 login.style.display="none";
 main.style.display="block";
 welcome.innerHTML="مرحباً "+user;
+
+startTime=Date.now();
+setInterval(()=>{
+timer.innerHTML="⏱️ "+Math.floor((Date.now()-startTime)/1000)+" ثانية";
+},1000);
+
 load();
-fact();
-loadNotes();
+quote();
 }
 
 function load(){
@@ -152,67 +194,65 @@ ans.innerHTML=`
 
 function answer(v){
 score+=v;
+points+=10;
+level.innerHTML="النقاط: "+points;
 }
 
 function next(){
 i++;
-bar.style.width=(i/15*100)+"%";
-if(i<15) load(); else finish();
+bar.style.width=(i/20*100)+"%";
+if(i<20) load(); else finish();
 }
 
 function finish(){
-let percent=Math.round(score/30*100);
-result.innerHTML="نتيجتك: "+percent+"%";
-
+let p=Math.round(score/40*100);
 let old=localStorage.old||0;
-result.innerHTML+="<br>السابق: "+old+"%";
-localStorage.old=percent;
 
-draw(percent);
+result.innerHTML="نتيجتك: "+p+"%<br>السابق: "+old+"%";
+localStorage.old=p;
 
-analysis(percent);
-plan();
-achievement(percent);
+analysis.innerHTML= p<50?"⚠️ تحتاج راحة": p<75?"🙂 جيد":"👏 ممتاز";
+
+draw(p);
+planGen();
+achieve(p);
+
+cert.innerHTML="شهادة: "+user+" - "+p+"%";
 }
 
 function draw(p){
-new Chart(chart,{
-type:'bar',
-data:{labels:["نتيجتك"],datasets:[{data:[p]}]}
+new Chart(chart,{type:'doughnut',
+data:{labels:["نتيجتك","الباقي"],datasets:[{data:[p,100-p]}]}});
+
+new Chart(radar,{
+type:'radar',
+data:{labels:["نوم","توتر","سعادة","ثقة","علاقات"],
+datasets:[{data:[p/2,p/3,p/2,p/2,p/2]}]}
 });
 }
 
-function analysis(p){
-let text="";
-if(p<50) text="⚠️ تحتاج تحسين النوم وتقليل التوتر";
-else if(p<75) text="🙂 وضعك جيد";
-else text="👏 ممتاز";
-report.innerHTML=text;
-}
-
-function plan(){
-let days=["رياضة","نوم مبكر","تواصل","راحة","قراءة","مشي","تأمل"];
+function planGen(){
+let arr=["رياضة","نوم","راحة","تواصل","مشي","تأمل"];
 plan.innerHTML="";
-days.forEach(d=>plan.innerHTML+=`<li>${d}</li>`);
+arr.forEach(x=>plan.innerHTML+=`<li>${x}</li>`);
 }
 
 function breathing(){
-let count=5;
-let interval=setInterval(()=>{
-breath.innerHTML="تنفس "+count;
-count--;
-if(count<0){clearInterval(interval);breath.innerHTML="انتهى";}
+let c=5;
+let t=setInterval(()=>{
+breath.innerHTML="تنفس "+c;
+c--;
+if(c<0){clearInterval(t);breath.innerHTML="انتهى";}
 },1000);
 }
 
 function advisor(){
-let tips=["خذ راحة","اشرب ماء","تواصل مع صديق","نم جيداً"];
+let tips=["استرخي","اشرب ماء","نم جيداً","تواصل"];
 adv.innerHTML=tips[Math.floor(Math.random()*tips.length)];
 }
 
 function scenario(x){
-if(x==1) scenarioResult.innerHTML="👏 قرار ممتاز";
-else scenarioResult.innerHTML="⚠️ حاول تهدأ";
+sc.innerHTML= x==1?"👏 ممتاز":"⚠️ حاول تهدأ";
 }
 
 function mood(m){
@@ -227,19 +267,21 @@ localStorage.note=note.value;
 notes.innerHTML=note.value;
 }
 
-function loadNotes(){
-notes.innerHTML=localStorage.note||"";
+function saveGoal(){
+goalText.innerHTML=goal.value;
 }
 
-function achievement(p){
-if(p>80) ach.innerHTML="🏆 ممتاز";
-else if(p>50) ach.innerHTML="👍 جيد";
-else ach.innerHTML="💪 تحتاج تطوير";
+function achieve(p){
+ach.innerHTML= p>80?"🏆 بطل":"👍 استمر";
 }
 
-function fact(){
-let f=["النوم مهم","الرياضة تقلل التوتر","التواصل مهم"];
-fact.innerHTML=f[Math.floor(Math.random()*f.length)];
+function theme(){
+document.body.style.background="linear-gradient(135deg,#f472b6,#60a5fa)";
+}
+
+function quote(){
+let q=["ابدأ يومك بإيجابية","أنت قوي","لا تستسلم"];
+document.getElementById("quote").innerHTML=q[Math.floor(Math.random()*q.length)];
 }
 
 </script>
