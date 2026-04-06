@@ -89,28 +89,27 @@ border:none;
 let i=0,score=0,user="";
 let sleep=0, stress=0, mood=0, confidence=0, social=0, study=0;
 
-// ذاكرة
 let memory = JSON.parse(localStorage.getItem("chatMemory") || "[]");
 
-// أسئلة عميقة
+// الأسئلة
 let questions = [
-{q:"خلال الأسبوع الماضي، كم مرة واجهت صعوبة في النوم بسبب التفكير أو القلق؟", type:"sleep"},
-{q:"هل تشعر أن نومك غير كافي ويؤثر على يومك؟", type:"sleep"},
+{q:"كم ساعة تنام يومياً؟", type:"sleep"},
+{q:"هل نومك كافي ويعطيك طاقة؟", type:"sleep"},
 
-{q:"كم مرة شعرت بتوتر بدون سبب واضح؟", type:"stress"},
+{q:"كم مرة تشعر بالتوتر؟", type:"stress"},
 {q:"هل تجد صعوبة في تهدئة نفسك؟", type:"stress"},
 
-{q:"هل تشعر أن يومك يمر بدون متعة؟", type:"mood"},
-{q:"هل فقدت الاهتمام بأشياء كنت تحبها؟", type:"mood"},
+{q:"كيف تصف مزاجك بشكل عام؟", type:"mood"},
+{q:"هل تستمتع بحياتك اليومية؟", type:"mood"},
 
-{q:"هل تقلل من نفسك أو إنجازاتك؟", type:"confidence"},
+{q:"هل تثق بنفسك؟", type:"confidence"},
 {q:"هل تخاف من رأي الآخرين؟", type:"confidence"},
 
-{q:"هل تشعر بالوحدة حتى بين الناس؟", type:"social"},
-{q:"هل تجد صعوبة في التعبير؟", type:"social"},
+{q:"هل تشعر بالوحدة؟", type:"social"},
+{q:"هل عندك أشخاص قريبين؟", type:"social"},
 
-{q:"هل الدراسة تسبب لك ضغط؟", type:"study"},
-{q:"هل تجد صعوبة في التركيز؟", type:"study"}
+{q:"هل الدراسة تضغطك؟", type:"study"},
+{q:"هل تركز بسهولة؟", type:"study"}
 ];
 
 function start(){
@@ -122,12 +121,41 @@ loadQ();
 }
 
 function loadQ(){
-q.innerHTML=questions[i].q;
-ans.innerHTML=`
+
+let current = questions[i];
+q.innerHTML = current.q;
+
+// أنواع الإجابات
+if(current.type == "sleep"){
+
+ans.innerHTML = `
+<button onclick="answer(0)">أقل من 5 ساعات</button>
+<button onclick="answer(1)">5-6 ساعات</button>
+<button onclick="answer(2)">7-8 ساعات</button>
+`;
+
+}
+
+else if(current.type == "mood"){
+
+ans.innerHTML = `
+<button onclick="answer(0)">سيء</button>
+<button onclick="answer(1)">متوسط</button>
+<button onclick="answer(2)">جيد</button>
+`;
+
+}
+
+else{
+
+ans.innerHTML = `
 <button onclick="answer(2)">نعم</button>
 <button onclick="answer(1)">أحياناً</button>
 <button onclick="answer(0)">لا</button>
 `;
+
+}
+
 }
 
 function answer(v){
@@ -159,86 +187,54 @@ function analyze(){
 let total = sleep+stress+mood+confidence+social+study;
 let percent = Math.round(total/24*100);
 
-let txt="📊 التقييم العام: "+percent+"%<br><br>";
+let txt="📊 نتيجتك: "+percent+"%<br><br>";
 
-if(sleep < 3) txt+="😴 نومك غير مستقر<br>";
+if(sleep < 3) txt+="😴 نومك يحتاج تحسين<br>";
 if(stress < 3) txt+="😰 توتر مرتفع<br>";
 if(mood < 3) txt+="😊 مزاج منخفض<br>";
-if(confidence < 3) txt+="💪 ثقة منخفضة<br>";
-if(social < 3) txt+="🤝 علاقات تحتاج تحسين<br>";
+if(confidence < 3) txt+="💪 ثقة ضعيفة<br>";
+if(social < 3) txt+="🤝 علاقات تحتاج تطوير<br>";
 
-analysis.innerHTML = txt;
+analysis.innerHTML=txt;
 }
 
 function generatePlan(){
 
-let plan="📅 خطة عميقة:<br>";
+let plan="📅 خطتك:<br>";
 
-if(stress < 3){
-plan+="🧘 يومياً: تمارين تنفس<br>";
-plan+="📝 اكتب أفكارك<br>";
-}
-
-if(sleep < 3){
-plan+="😴 نوم منتظم بدون جوال<br>";
-}
-
-if(mood < 3){
-plan+="🎯 نشاط تحبه يومياً<br>";
-}
-
-if(social < 3){
-plan+="🤝 تواصل مع شخص قريب<br>";
-}
-
-if(confidence < 3){
-plan+="💪 سجل إنجازاتك<br>";
-}
+if(stress < 3) plan+="- تمارين تنفس يومية<br>";
+if(sleep < 3) plan+="- نوم منتظم<br>";
+if(mood < 3) plan+="- سو نشاط تحبه<br>";
+if(social < 3) plan+="- تواصل مع شخص قريب<br>";
+if(confidence < 3) plan+="- اكتب إنجازاتك<br>";
 
 document.getElementById("plan").innerHTML=plan;
 }
 
-// 🤖 AI ذكي بذاكرة
+// AI
 function sendMsg(){
 
 let input = userInput.value.toLowerCase();
 if(!input) return;
 
 chatBox.innerHTML += `<p>👤: ${input}</p>`;
-memory.push({role:"user", text:input});
-
-let history = memory.slice(-5).map(m=>m.text).join(" ");
-let context = "";
-
-if(history.includes("توتر")) context="واضح أنك تعاني من توتر مستمر. ";
 
 let reply="";
 
 if(input.includes("نوم")){
-reply="واضح أنك تعاني من مشكلة نوم، جرب تنظم وقتك.";
+reply="حاول تنظم نومك وتبتعد عن الجوال.";
 }
-else if(input.includes("توتر")||input.includes("قلق")){
-reply="التوتر واضح، خلنا نهدأ ونفكر بحل.";
+else if(input.includes("توتر")){
+reply="جرب تمارين التنفس وهدّئ نفسك.";
 }
 else if(input.includes("حزين")){
-reply="الحزن شعور طبيعي، تكلم مع شخص تثق فيه.";
+reply="تكلم مع شخص تثق فيه.";
 }
 else{
 reply="أنا معك، احكي أكثر.";
 }
 
-let plan="<br><br>📅 نصيحتي:<br>";
-
-if(stress < 3) plan+="- تنفس يومي<br>";
-if(sleep < 3) plan+="- نام بدري<br>";
-if(mood < 3) plan+="- سو شي تحبه<br>";
-
-let finalReply=context + reply + plan;
-
-chatBox.innerHTML += `<p>🤖: ${finalReply}</p>`;
-memory.push({role:"bot", text:finalReply});
-
-localStorage.setItem("chatMemory", JSON.stringify(memory));
+chatBox.innerHTML += `<p>🤖: ${reply}</p>`;
 
 userInput.value="";
 chatBox.scrollTop = chatBox.scrollHeight;
