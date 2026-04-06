@@ -2,62 +2,30 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>منصة الصحة النفسية </title>
+<title>منصة الصحة النفسية الذكية</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
 body{
 font-family:'Cairo';
 margin:0;
 background:linear-gradient(135deg,#0ea5e9,#a78bfa);
 color:white;
 text-align:center;
-transition:0.5s;
 }
 
-/* شاشة التحميل */
-#loadingScreen{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#0f172a;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-z-index:999;
-}
-
-#loadBar{
-width:0%;
-height:10px;
-background:#3b82f6;
-margin-top:20px;
-}
-
-/* الكروت */
 .card{
 background:white;
 color:#333;
 margin:15px;
 padding:20px;
 border-radius:20px;
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
-animation:fade 0.8s;
-}
-
-@keyframes fade{
-from{opacity:0; transform:translateY(20px);}
-to{opacity:1;}
 }
 
 button{
-padding:10px 20px;
+padding:10px;
 margin:5px;
 border:none;
 border-radius:10px;
@@ -66,46 +34,33 @@ color:white;
 cursor:pointer;
 }
 
-input,textarea{
+input{
 padding:10px;
-border-radius:10px;
-border:1px solid #ccc;
 margin:5px;
+border-radius:10px;
+border:none;
 }
 
-#bar{height:15px;background:lime;width:0%;border-radius:10px;}
-
+#bar{height:15px;background:lime;width:0%;}
 </style>
 </head>
 
 <body>
 
-<!-- تحميل -->
-<div id="loadingScreen">
-<h1>💙 جاري تحميل تجربتك...</h1>
-<div id="loadBar"></div>
-</div>
-
-<!-- صوت -->
-<audio id="bgSound" src="https://www.soundjay.com/nature/sounds/rain-01.mp3"></audio>
-
-<!-- البداية -->
+<!-- تسجيل الدخول -->
 <div id="login">
-<h1 style="font-size:50px">💙 منصة الصحة النفسية</h1>
-<p>ابدأ رحلتك نحو التوازن النفسي</p>
+<h1>💙 منصة الصحة النفسية</h1>
 <input id="name" placeholder="اسمك">
 <input id="age" placeholder="عمرك"><br>
-<button onclick="start()">🚀 ابدأ رحلتك</button>
+<button onclick="start()">ابدأ</button>
 </div>
 
 <!-- الموقع -->
 <div id="main" style="display:none">
 
 <h2 id="welcome"></h2>
-<p id="timer"></p>
 
-<button onclick="theme()">🎨 تغيير الشكل</button>
-
+<!-- اختبار -->
 <div class="card">
 <h2>🧠 الاختبار</h2>
 <p id="q"></p>
@@ -114,98 +69,68 @@ margin:5px;
 <div style="background:#ddd"><div id="bar"></div></div>
 </div>
 
+<!-- تحليل -->
 <div class="card">
-<h2>📊 النتائج</h2>
-<p id="result"></p>
-<canvas id="chart"></canvas>
-<canvas id="radar"></canvas>
-</div>
-
-<div class="card">
-<h2>📋 التحليل</h2>
+<h2>📊 التحليل</h2>
 <p id="analysis"></p>
 </div>
 
+<!-- خطة -->
 <div class="card">
-<h2>🧘 تنفس</h2>
-<p id="breath"></p>
-<button onclick="breathing()">ابدأ</button>
+<h2>📅 الخطة العلاجية</h2>
+<p id="plan"></p>
 </div>
 
+<!-- شات AI -->
 <div class="card">
-<h2>💬 مستشار</h2>
-<button onclick="advisor()">نصيحة</button>
-<p id="adv"></p>
-</div>
+<h2>🤖 المستشار الذكي</h2>
 
-<div class="card">
-<h2>🎮 موقف</h2>
-<button onclick="scenario(1)">أذاكر</button>
-<button onclick="scenario(2)">أتوتر</button>
-<p id="sc"></p>
-</div>
+<div id="chatBox" style="height:200px;overflow:auto;background:#eee;color:black;padding:10px;text-align:right"></div>
 
-<div class="card">
-<h2>😄 حالتك</h2>
-<button onclick="mood('😄')">سعيد</button>
-<button onclick="mood('😐')">عادي</button>
-<button onclick="mood('😔')">حزين</button>
-<p id="moods"></p>
-</div>
+<input id="userInput" placeholder="اكتب مشكلتك..." style="width:70%">
+<button onclick="sendMsg()">إرسال</button>
 
-<div class="card">
-<h2>📝 ملاحظات</h2>
-<textarea id="note"></textarea>
-<button onclick="saveNote()">حفظ</button>
-<p id="notes"></p>
-</div>
-
-<div class="card">
-<h2>🏆 إنجازات</h2>
-<p id="ach"></p>
 </div>
 
 </div>
 
 <script>
 
-/* تحميل */
-let load=0;
-let loader=setInterval(()=>{
-load+=10;
-document.getElementById("loadBar").style.width=load+"%";
-if(load>=100){
-clearInterval(loader);
-document.getElementById("loadingScreen").style.display="none";
-}
-},200);
+// بيانات
+let i=0, score=0, user="";
+let sleep=0, stress=0, mood=0, confidence=0, social=0, study=0;
 
-let user="",i=0,score=0,startTime;
+// ذاكرة الشات
+let memory = JSON.parse(localStorage.getItem("chatMemory") || "[]");
 
-let questions=[
-"هل تنام جيداً؟","هل تتوتر؟","هل سعيد؟","هل تثق بنفسك؟",
-"هل لديك أصدقاء؟","هل تمارس الرياضة؟","هل تستخدم الجوال كثير؟",
-"هل تفكر كثيراً؟","هل تحب نفسك؟","هل مرتاح؟"
+// الأسئلة
+let questions = [
+{q:"كم ساعة تنام يومياً؟", type:"sleep"},
+{q:"هل تعاني من صعوبة في النوم؟", type:"sleep"},
+{q:"كم مرة تشعر بالقلق؟", type:"stress"},
+{q:"هل تفكر كثيراً؟", type:"stress"},
+{q:"هل تشعر بالسعادة؟", type:"mood"},
+{q:"هل تستمتع بالأنشطة؟", type:"mood"},
+{q:"هل تثق بنفسك؟", type:"confidence"},
+{q:"هل تقارن نفسك؟", type:"confidence"},
+{q:"هل لديك أصدقاء؟", type:"social"},
+{q:"هل تشعر بالوحدة؟", type:"social"},
+{q:"هل عندك ضغط دراسي؟", type:"study"},
+{q:"هل تنظم وقتك؟", type:"study"}
 ];
 
+// بدء
 function start(){
 user=name.value;
 login.style.display="none";
 main.style.display="block";
 welcome.innerHTML="مرحباً "+user;
-
-document.getElementById("bgSound").play();
-
-startTime=Date.now();
-setInterval(()=>{
-timer.innerHTML="⏱️ "+Math.floor((Date.now()-startTime)/1000)+" ثانية";
-},1000);
-
 loadQ();
 }
 
+// عرض سؤال
 function loadQ(){
-q.innerHTML=questions[i];
+q.innerHTML=questions[i].q;
 ans.innerHTML=`
 <button onclick="answer(2)">نعم</button>
 <button onclick="answer(1)">أحياناً</button>
@@ -213,63 +138,156 @@ ans.innerHTML=`
 `;
 }
 
-function answer(v){score+=v;}
+// تسجيل إجابة
+function answer(v){
+let t=questions[i].type;
 
+if(t=="sleep") sleep+=v;
+if(t=="stress") stress+=v;
+if(t=="mood") mood+=v;
+if(t=="confidence") confidence+=v;
+if(t=="social") social+=v;
+if(t=="study") study+=v;
+
+score+=v;
+}
+
+// التالي
 function next(){
 i++;
-bar.style.width=(i/10*100)+"%";
-if(i<10) loadQ(); else finish();
+bar.style.width=(i/12*100)+"%";
+if(i<12) loadQ(); else finish();
 }
 
+// النهاية
 function finish(){
-let p=Math.round(score/20*100);
-result.innerHTML="نتيجتك: "+p+"%";
-analysis.innerHTML=p<50?"⚠️ تحتاج تحسين":p<75?"🙂 جيد":"👏 ممتاز";
-
-new Chart(chart,{type:'doughnut',
-data:{labels:["نتيجتك","الباقي"],datasets:[{data:[p,100-p]}]}});
-
-new Chart(radar,{
-type:'radar',
-data:{labels:["نوم","توتر","سعادة","ثقة","علاقات"],
-datasets:[{data:[p/2,p/3,p/2,p/2,p/2]}]}
-});
-
-ach.innerHTML=p>80?"🏆 ممتاز":"👍 استمر";
+analyze();
+generatePlan();
 }
 
-function breathing(){
-let c=5;
-let t=setInterval(()=>{
-breath.innerHTML="تنفس "+c;
-c--;
-if(c<0){clearInterval(t);breath.innerHTML="انتهى";}
-},1000);
+// التحليل
+function analyze(){
+
+let total = sleep+stress+mood+confidence+social+study;
+let percent = Math.round(total/24*100);
+
+let txt="📊 نتيجتك: "+percent+"%<br><br>";
+
+txt+="😴 النوم: "+sleep*10+"%<br>";
+txt+="😰 التوتر: "+stress*10+"%<br>";
+txt+="😊 المزاج: "+mood*10+"%<br>";
+txt+="💪 الثقة: "+confidence*10+"%<br>";
+txt+="🤝 العلاقات: "+social*10+"%<br>";
+txt+="📚 الضغط: "+study*10+"%<br><br>";
+
+if(stress<3) txt+="⚠️ توتر مرتفع<br>";
+if(sleep<3) txt+="⚠️ نوم ضعيف<br>";
+if(mood<3) txt+="⚠️ مزاج منخفض<br>";
+
+analysis.innerHTML=txt;
 }
 
-function advisor(){
-let tips=["استرخي","اشرب ماء","نم جيداً"];
-adv.innerHTML=tips[Math.floor(Math.random()*tips.length)];
+// الخطة
+function generatePlan(){
+
+let plan="📅 خطتك:<br>";
+
+if(stress<3) plan+="- تمرين تنفس يومي<br>";
+if(sleep<3) plan+="- نم 7-8 ساعات<br>";
+if(mood<3) plan+="- مارس نشاط تحبه<br>";
+if(social<3) plan+="- تواصل مع صديق<br>";
+if(confidence<3) plan+="- اكتب إنجازاتك<br>";
+
+document.getElementById("plan").innerHTML=plan;
 }
 
-function scenario(x){
-sc.innerHTML=x==1?"👏 ممتاز":"⚠️ حاول تهدأ";
+// 🤖 AI الذكي بذاكرة
+function sendMsg(){
+
+let input = userInput.value.toLowerCase();
+let chat = chatBox;
+
+if(input=="") return;
+
+// حفظ
+memory.push({role:"user", text:input});
+localStorage.setItem("chatMemory", JSON.stringify(memory));
+
+// عرض المستخدم
+chat.innerHTML += "<p>👤: "+input+"</p>";
+
+// تحليل كلمات
+let keywords = {
+"متوتر":["قلق","توتر","ضغط"],
+"حزين":["حزن","ضايق"],
+"نوم":["نوم","تعب"],
+"وحدة":["وحيد","وحده"],
+"دراسة":["اختبار","مدرسة"]
+};
+
+function detect(text){
+for(let k in keywords){
+for(let w of keywords[k]){
+if(text.includes(w)) return k;
+}
+}
+return "عام";
 }
 
-function mood(m){
-let arr=JSON.parse(localStorage.m||"[]");
-arr.push(m);
-localStorage.m=JSON.stringify(arr);
-moods.innerHTML=arr.join(" ");
+let type = detect(input);
+
+// ذاكرة
+let lastMsgs = memory.slice(-3).map(m=>m.text).join(" ");
+let memoryHint = "";
+
+if(lastMsgs.includes("توتر")||lastMsgs.includes("قلق"))
+memoryHint="واضح أنك تعاني من توتر مستمر. ";
+
+// رد
+let reply="", deep="";
+
+switch(type){
+case "متوتر":
+reply="واضح أنك متوتر.";
+deep="جرب تهدئة نفسك بالتنفس.";
+break;
+
+case "حزين":
+reply="أفهم شعورك.";
+deep="تكلم مع شخص قريب.";
+break;
+
+case "نوم":
+reply="نومك يحتاج تحسين.";
+deep="نظم وقت نومك.";
+break;
+
+default:
+reply="أنا معك.";
+deep="وضح أكثر.";
 }
 
-function saveNote(){
-localStorage.note=note.value;
-notes.innerHTML=note.value;
-}
+// ربط بالتحليل
+if(stress<3) deep+="<br>📊 عندك توتر مرتفع";
+if(sleep<3) deep+="<br>😴 نومك ضعيف";
 
-function theme(){
-document.body.style.background="linear-gradient(135deg,#f472b6,#60a5fa)";
+// خطة
+let plan="<br><br>📅 نصيحتي:<br>";
+if(stress<3) plan+="- تنفس<br>";
+if(sleep<3) plan+="- نام بدري<br>";
+if(mood<3) plan+="- سو شي تحبه<br>";
+
+let finalReply = memoryHint + reply + "<br>"+deep+plan;
+
+// حفظ
+memory.push({role:"bot", text:finalReply});
+localStorage.setItem("chatMemory", JSON.stringify(memory));
+
+// عرض
+chat.innerHTML += "<p>🤖: "+finalReply+"</p>";
+
+userInput.value="";
+chat.scrollTop = chat.scrollHeight;
 }
 
 </script>
