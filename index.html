@@ -5,7 +5,6 @@
 <title>منصة الصحة النفسية الذكية</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
@@ -47,7 +46,6 @@ border:none;
 
 <body>
 
-<!-- تسجيل الدخول -->
 <div id="login">
 <h1>💙 منصة الصحة النفسية</h1>
 <input id="name" placeholder="اسمك">
@@ -55,12 +53,10 @@ border:none;
 <button onclick="start()">ابدأ</button>
 </div>
 
-<!-- الموقع -->
 <div id="main" style="display:none">
 
 <h2 id="welcome"></h2>
 
-<!-- اختبار -->
 <div class="card">
 <h2>🧠 الاختبار</h2>
 <p id="q"></p>
@@ -69,57 +65,54 @@ border:none;
 <div style="background:#ddd"><div id="bar"></div></div>
 </div>
 
-<!-- تحليل -->
 <div class="card">
 <h2>📊 التحليل</h2>
 <p id="analysis"></p>
 </div>
 
-<!-- خطة -->
 <div class="card">
 <h2>📅 الخطة العلاجية</h2>
 <p id="plan"></p>
 </div>
 
-<!-- شات AI -->
 <div class="card">
 <h2>🤖 المستشار الذكي</h2>
-
 <div id="chatBox" style="height:200px;overflow:auto;background:#eee;color:black;padding:10px;text-align:right"></div>
-
 <input id="userInput" placeholder="اكتب مشكلتك..." style="width:70%">
 <button onclick="sendMsg()">إرسال</button>
-
 </div>
 
 </div>
 
 <script>
 
-// بيانات
-let i=0, score=0, user="";
+let i=0,score=0,user="";
 let sleep=0, stress=0, mood=0, confidence=0, social=0, study=0;
 
-// ذاكرة الشات
+// ذاكرة
 let memory = JSON.parse(localStorage.getItem("chatMemory") || "[]");
 
-// الأسئلة
+// أسئلة عميقة
 let questions = [
-{q:"كم ساعة تنام يومياً؟", type:"sleep"},
-{q:"هل تعاني من صعوبة في النوم؟", type:"sleep"},
-{q:"كم مرة تشعر بالقلق؟", type:"stress"},
-{q:"هل تفكر كثيراً؟", type:"stress"},
-{q:"هل تشعر بالسعادة؟", type:"mood"},
-{q:"هل تستمتع بالأنشطة؟", type:"mood"},
-{q:"هل تثق بنفسك؟", type:"confidence"},
-{q:"هل تقارن نفسك؟", type:"confidence"},
-{q:"هل لديك أصدقاء؟", type:"social"},
-{q:"هل تشعر بالوحدة؟", type:"social"},
-{q:"هل عندك ضغط دراسي؟", type:"study"},
-{q:"هل تنظم وقتك؟", type:"study"}
+{q:"خلال الأسبوع الماضي، كم مرة واجهت صعوبة في النوم بسبب التفكير أو القلق؟", type:"sleep"},
+{q:"هل تشعر أن نومك غير كافي ويؤثر على يومك؟", type:"sleep"},
+
+{q:"كم مرة شعرت بتوتر بدون سبب واضح؟", type:"stress"},
+{q:"هل تجد صعوبة في تهدئة نفسك؟", type:"stress"},
+
+{q:"هل تشعر أن يومك يمر بدون متعة؟", type:"mood"},
+{q:"هل فقدت الاهتمام بأشياء كنت تحبها؟", type:"mood"},
+
+{q:"هل تقلل من نفسك أو إنجازاتك؟", type:"confidence"},
+{q:"هل تخاف من رأي الآخرين؟", type:"confidence"},
+
+{q:"هل تشعر بالوحدة حتى بين الناس؟", type:"social"},
+{q:"هل تجد صعوبة في التعبير؟", type:"social"},
+
+{q:"هل الدراسة تسبب لك ضغط؟", type:"study"},
+{q:"هل تجد صعوبة في التركيز؟", type:"study"}
 ];
 
-// بدء
 function start(){
 user=name.value;
 login.style.display="none";
@@ -128,7 +121,6 @@ welcome.innerHTML="مرحباً "+user;
 loadQ();
 }
 
-// عرض سؤال
 function loadQ(){
 q.innerHTML=questions[i].q;
 ans.innerHTML=`
@@ -138,7 +130,6 @@ ans.innerHTML=`
 `;
 }
 
-// تسجيل إجابة
 function answer(v){
 let t=questions[i].type;
 
@@ -152,142 +143,105 @@ if(t=="study") study+=v;
 score+=v;
 }
 
-// التالي
 function next(){
 i++;
 bar.style.width=(i/12*100)+"%";
 if(i<12) loadQ(); else finish();
 }
 
-// النهاية
 function finish(){
 analyze();
 generatePlan();
 }
 
-// التحليل
 function analyze(){
 
 let total = sleep+stress+mood+confidence+social+study;
 let percent = Math.round(total/24*100);
 
-let txt="📊 نتيجتك: "+percent+"%<br><br>";
+let txt="📊 التقييم العام: "+percent+"%<br><br>";
 
-txt+="😴 النوم: "+sleep*10+"%<br>";
-txt+="😰 التوتر: "+stress*10+"%<br>";
-txt+="😊 المزاج: "+mood*10+"%<br>";
-txt+="💪 الثقة: "+confidence*10+"%<br>";
-txt+="🤝 العلاقات: "+social*10+"%<br>";
-txt+="📚 الضغط: "+study*10+"%<br><br>";
+if(sleep < 3) txt+="😴 نومك غير مستقر<br>";
+if(stress < 3) txt+="😰 توتر مرتفع<br>";
+if(mood < 3) txt+="😊 مزاج منخفض<br>";
+if(confidence < 3) txt+="💪 ثقة منخفضة<br>";
+if(social < 3) txt+="🤝 علاقات تحتاج تحسين<br>";
 
-if(stress<3) txt+="⚠️ توتر مرتفع<br>";
-if(sleep<3) txt+="⚠️ نوم ضعيف<br>";
-if(mood<3) txt+="⚠️ مزاج منخفض<br>";
-
-analysis.innerHTML=txt;
+analysis.innerHTML = txt;
 }
 
-// الخطة
 function generatePlan(){
 
-let plan="📅 خطتك:<br>";
+let plan="📅 خطة عميقة:<br>";
 
-if(stress<3) plan+="- تمرين تنفس يومي<br>";
-if(sleep<3) plan+="- نم 7-8 ساعات<br>";
-if(mood<3) plan+="- مارس نشاط تحبه<br>";
-if(social<3) plan+="- تواصل مع صديق<br>";
-if(confidence<3) plan+="- اكتب إنجازاتك<br>";
+if(stress < 3){
+plan+="🧘 يومياً: تمارين تنفس<br>";
+plan+="📝 اكتب أفكارك<br>";
+}
+
+if(sleep < 3){
+plan+="😴 نوم منتظم بدون جوال<br>";
+}
+
+if(mood < 3){
+plan+="🎯 نشاط تحبه يومياً<br>";
+}
+
+if(social < 3){
+plan+="🤝 تواصل مع شخص قريب<br>";
+}
+
+if(confidence < 3){
+plan+="💪 سجل إنجازاتك<br>";
+}
 
 document.getElementById("plan").innerHTML=plan;
 }
 
-// 🤖 AI الذكي بذاكرة
+// 🤖 AI ذكي بذاكرة
 function sendMsg(){
 
 let input = userInput.value.toLowerCase();
-let chat = chatBox;
+if(!input) return;
 
-if(input=="") return;
-
-// حفظ
+chatBox.innerHTML += `<p>👤: ${input}</p>`;
 memory.push({role:"user", text:input});
-localStorage.setItem("chatMemory", JSON.stringify(memory));
 
-// عرض المستخدم
-chat.innerHTML += "<p>👤: "+input+"</p>";
+let history = memory.slice(-5).map(m=>m.text).join(" ");
+let context = "";
 
-// تحليل كلمات
-let keywords = {
-"متوتر":["قلق","توتر","ضغط"],
-"حزين":["حزن","ضايق"],
-"نوم":["نوم","تعب"],
-"وحدة":["وحيد","وحده"],
-"دراسة":["اختبار","مدرسة"]
-};
+if(history.includes("توتر")) context="واضح أنك تعاني من توتر مستمر. ";
 
-function detect(text){
-for(let k in keywords){
-for(let w of keywords[k]){
-if(text.includes(w)) return k;
+let reply="";
+
+if(input.includes("نوم")){
+reply="واضح أنك تعاني من مشكلة نوم، جرب تنظم وقتك.";
 }
+else if(input.includes("توتر")||input.includes("قلق")){
+reply="التوتر واضح، خلنا نهدأ ونفكر بحل.";
 }
-return "عام";
+else if(input.includes("حزين")){
+reply="الحزن شعور طبيعي، تكلم مع شخص تثق فيه.";
+}
+else{
+reply="أنا معك، احكي أكثر.";
 }
 
-let type = detect(input);
-
-// ذاكرة
-let lastMsgs = memory.slice(-3).map(m=>m.text).join(" ");
-let memoryHint = "";
-
-if(lastMsgs.includes("توتر")||lastMsgs.includes("قلق"))
-memoryHint="واضح أنك تعاني من توتر مستمر. ";
-
-// رد
-let reply="", deep="";
-
-switch(type){
-case "متوتر":
-reply="واضح أنك متوتر.";
-deep="جرب تهدئة نفسك بالتنفس.";
-break;
-
-case "حزين":
-reply="أفهم شعورك.";
-deep="تكلم مع شخص قريب.";
-break;
-
-case "نوم":
-reply="نومك يحتاج تحسين.";
-deep="نظم وقت نومك.";
-break;
-
-default:
-reply="أنا معك.";
-deep="وضح أكثر.";
-}
-
-// ربط بالتحليل
-if(stress<3) deep+="<br>📊 عندك توتر مرتفع";
-if(sleep<3) deep+="<br>😴 نومك ضعيف";
-
-// خطة
 let plan="<br><br>📅 نصيحتي:<br>";
-if(stress<3) plan+="- تنفس<br>";
-if(sleep<3) plan+="- نام بدري<br>";
-if(mood<3) plan+="- سو شي تحبه<br>";
 
-let finalReply = memoryHint + reply + "<br>"+deep+plan;
+if(stress < 3) plan+="- تنفس يومي<br>";
+if(sleep < 3) plan+="- نام بدري<br>";
+if(mood < 3) plan+="- سو شي تحبه<br>";
 
-// حفظ
+let finalReply=context + reply + plan;
+
+chatBox.innerHTML += `<p>🤖: ${finalReply}</p>`;
 memory.push({role:"bot", text:finalReply});
-localStorage.setItem("chatMemory", JSON.stringify(memory));
 
-// عرض
-chat.innerHTML += "<p>🤖: "+finalReply+"</p>";
+localStorage.setItem("chatMemory", JSON.stringify(memory));
 
 userInput.value="";
-chat.scrollTop = chat.scrollHeight;
+chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 </script>
