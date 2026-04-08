@@ -7,8 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-
-/* عام */
 body{
 margin:0;
 font-family:'Cairo';
@@ -16,7 +14,7 @@ background:#0f172a;
 color:white;
 }
 
-/* شريط علوي */
+/* Navbar */
 .navbar{
 display:flex;
 justify-content:space-between;
@@ -24,23 +22,9 @@ padding:15px;
 background:#1e293b;
 }
 
-.navbar button{
-background:none;
-border:none;
-color:white;
-font-size:16px;
-cursor:pointer;
-}
-
 /* صفحات */
-.page{
-display:none;
-padding:20px;
-}
-
-.active{
-display:block;
-}
+.page{display:none;padding:20px;}
+.active{display:block;}
 
 /* كروت */
 .card{
@@ -51,12 +35,14 @@ margin-bottom:15px;
 }
 
 /* أزرار */
-button.main{
+button{
 background:#6366f1;
-padding:10px;
 border:none;
+padding:10px;
 border-radius:10px;
 color:white;
+margin:5px;
+cursor:pointer;
 }
 
 /* شات */
@@ -91,17 +77,14 @@ width:70%;
 border-radius:10px;
 border:none;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
 <div class="navbar">
 <div>🧠 الصحة النفسية</div>
 <div>
-<button onclick="show('home')">الرئيسية</button>
 <button onclick="show('test')">الاختبار</button>
 <button onclick="show('analysis')">التحليل</button>
 <button onclick="show('plan')">الخطة</button>
@@ -109,21 +92,12 @@ border:none;
 </div>
 </div>
 
-<!-- الصفحات -->
-
-<div id="home" class="page active">
+<div id="test" class="page active">
 <div class="card">
-<h2>مرحباً 👋</h2>
-<p>ابدأ اختبارك النفسي واحصل على تحليل وخطة علاجية مخصصة</p>
-</div>
-</div>
-
-<div id="test" class="page">
-<div class="card">
-<h2>🧠 الاختبار</h2>
+<h2>🧠 اختبار عميق</h2>
 <p id="q"></p>
 <div id="ans"></div>
-<button class="main" onclick="next()">التالي</button>
+<button onclick="next()">التالي</button>
 </div>
 </div>
 
@@ -146,81 +120,191 @@ border:none;
 <h2>🤖 المستشار</h2>
 <div id="chatBox" class="chat"></div>
 <input id="userInput">
-<button class="main" onclick="sendMsg()">إرسال</button>
+<button onclick="sendMsg()">إرسال</button>
 </div>
 </div>
 
 <script>
 
-// تنقل
-function show(page){
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-document.getElementById(page).classList.add('active');
+function show(p){
+document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+document.getElementById(p).classList.add('active');
 }
 
-// بيانات
 let i=0;
-let sleep=0, stress=0, mood=0;
+let sleep=0, stress=0, mood=0, social=0;
 
-// أسئلة
+// 🧠 أسئلة عميقة
 let questions=[
-"كم ساعة تنام؟",
-"هل تشعر بتوتر؟",
-"كيف مزاجك؟"
+
+{
+q:"عندما تذهب للنوم، كيف تكون حالتك؟",
+answers:[
+["أفكار كثيرة وقلق",0],
+["أحياناً قلق",1],
+["هادئ وأنام بسرعة",2]
+],type:"sleep"
+},
+
+{
+q:"كيف تتعامل مع الضغط؟",
+answers:[
+["ينهار مزاجي بسرعة",0],
+["أحاول أتحمل",1],
+["أتعامل معه بهدوء",2]
+],type:"stress"
+},
+
+{
+q:"كيف تشعر داخلياً أغلب الوقت؟",
+answers:[
+["حزين أو فارغ",0],
+["متقلب",1],
+["مستقر",2]
+],type:"mood"
+},
+
+{
+q:"هل تشعر أنك وحيد؟",
+answers:[
+["نعم جداً",0],
+["أحياناً",1],
+["لا",2]
+],type:"social"
+}
+
 ];
 
 function loadQ(){
-q.innerHTML=questions[i];
-ans.innerHTML=`
-<button onclick="answer(2)">جيد</button>
-<button onclick="answer(1)">متوسط</button>
-<button onclick="answer(0)">سيء</button>
-`;
+let c=questions[i];
+q.innerHTML=c.q;
+
+ans.innerHTML="";
+c.answers.forEach(a=>{
+ans.innerHTML+=`<button onclick="answer(${a[1]})">${a[0]}</button>`;
+});
 }
 
 loadQ();
 
 function answer(v){
-if(i==0) sleep+=v;
-if(i==1) stress+=v;
-if(i==2) mood+=v;
+let t=questions[i].type;
+if(t=="sleep") sleep+=v;
+if(t=="stress") stress+=v;
+if(t=="mood") mood+=v;
+if(t=="social") social+=v;
 }
 
 function next(){
 i++;
-if(i<questions.length){
-loadQ();
-}else{
-finish();
-}
+if(i<questions.length) loadQ();
+else finish();
 }
 
 function finish(){
+
 analysisText.innerHTML=`
-نوم: ${sleep*50}%<br>
-توتر: ${stress*50}%<br>
-مزاج: ${mood*50}%
+😴 نوم: ${sleep*50}%<br>
+😰 ضغط: ${stress*50}%<br>
+😊 مزاج: ${mood*50}%<br>
+🤝 اجتماعي: ${social*50}%<br><br>
+
+📌 تفسير:<br>
+${mood<2?"واضح إنك تمر بحالة تحتاج اهتمام نفسي":"وضعك مستقر"}
 `;
 
 planText.innerHTML=`
-اليوم1: راحة<br>
-اليوم2: تمارين<br>
-اليوم3: نشاط
+📅 خطة أسبوع:<br><br>
+
+اليوم1: اكتب كل اللي داخلك<br>
+اليوم2: تنفس عميق 10 دقائق<br>
+اليوم3: اطلع تمشي<br>
+اليوم4: تواصل مع شخص<br>
+اليوم5: قلل الجوال<br>
+اليوم6: طور نفسك<br>
+اليوم7: راجع نفسك
 `;
 }
 
-// AI
-function sendMsg(){
-let input=userInput.value;
-chatBox.innerHTML+=`<div class="msg-user">${input}</div>`;
+// 🤖 AI قوي
+function function sendMsg(){
 
-let reply="أنا معك، احكي أكثر 👍";
+let input = userInput.value;
+chatBox.innerHTML += `<div class="msg-user">${input}</div>`;
 
-chatBox.innerHTML+=`<div class="msg-bot">${reply}</div>`;
-userInput.value="";
+let reply = "";
+
+// 🧠 اكتئاب
+if(input.includes("مكتئب") || input.includes("اكتئاب")){
+reply =
+"أفهمك… الاكتئاب مو مجرد حزن، هو حالة ثقيلة تخلي الإنسان يحس إن كل شيء صار بلا طعم. " +
+"اللي تمر فيه ممكن يكون نتيجة ضغط متراكم أو فقدان معنى أو حتى إرهاق نفسي طويل. " +
+"خلني أكون واضح معك: هذا الشي مو ضعف فيك أبدًا، هذا تعب يحتاج تعامل صحيح.\n\n" +
+"🔹 أبغى أسألك: هل فقدت اهتمامك بالأشياء اللي كنت تحبها؟\n" +
+"🔹 وهل تحس إن طاقتك منخفضة حتى بدون سبب؟\n\n" +
+"لو نعم، أهم خطوة الآن مو الحل السريع… بل إعادة بناء يومك بشكل بسيط جداً: نوم، أكل، حركة، وكلام مع شخص واحد تثق فيه.";
 }
 
-</script>
+// 🧠 وحدة
+else if(input.includes("وحيد") || input.includes("وحدة")){
+reply =
+"الوحدة شعور قاسي، خصوصاً لما تحس إنك حول ناس لكن داخلياً ما فيه أحد يفهمك. " +
+"لكن خلني أقول لك شيء مهم: الوحدة مو دائماً نقص ناس، أحياناً نقص ارتباط حقيقي.\n\n" +
+"يمكن حولك أشخاص لكن ما فيه أحد تشعر معه بالأمان أو الفهم.\n\n" +
+"🔹 هل عندك شخص واحد تقدر تتكلم معه بدون خوف؟\n" +
+"🔹 أو هل تحس إنك تعزل نفسك حتى لو الفرصة موجودة؟\n\n" +
+"الحل يبدأ من خطوة صغيرة جداً: تواصل بسيط مع شخص واحد يومياً حتى لو رسالة قصيرة.";
+}
 
-</body>
-</html>
+// 🧠 قلق
+else if(input.includes("قلق") || input.includes("توتر")){
+reply =
+"القلق شعور يخلي العقل يشتغل زيادة عن اللازم… كأنك تفكر في كل شيء ممكن يصير غلط. " +
+"وهذا يستهلك طاقتك بدون ما تحس.\n\n" +
+"🔹 هل قلقك يجيك بدون سبب واضح؟\n" +
+"🔹 أو بسبب أفكار عن المستقبل؟\n\n" +
+"الحل يبدأ بتنظيم الأفكار مو إيقافها: اكتبها بدل ما تعيشها داخل راسك.";
+}
+
+// 🧠 العادة السرية
+else if(input.includes("عادة") || input.includes("العادة") || input.includes("استمناء")){
+reply =
+"اللي تمر فيه شائع أكثر مما تتخيل… وغالباً ما يكون مو بسبب رغبة فقط، بل بسبب: " +
+"فراغ، ضغط نفسي، ملل، أو هروب من مشاعر داخلية.\n\n" +
+"خلني أكون معك صريح بدون حكم:\n" +
+"أنت مو المشكلة… لكن السلوك هذا صار طريقة تهدئة مؤقتة.\n\n" +
+"🔹 متى أكثر وقت يصير فيه هذا الشي؟\n" +
+"🔹 هل يكون وقت الملل أو قبل النوم؟\n\n" +
+"الحل الواقعي: تقليل المحفزات + تغيير الروتين + إشغال الوقت + نوم منتظم + حركة يومية.";
+}
+
+// 🧠 فقدان شغف
+else if(input.includes("طفشان") || input.includes("ملل") || input.includes("ما عندي شغف")){
+reply =
+"فقدان الشغف مو كسل… هو غالباً علامة إنك مستنزف نفسياً أو حياتك فيها روتين ثقيل. " +
+"العقل أحياناً يطفئ الإحساس عشان يحميك من الضغط.\n\n" +
+"🔹 متى آخر مرة حسّيت بحماس حقيقي؟\n" +
+"🔹 هل حياتك فيها تغيير أو كلها نفس الشي يومياً؟\n\n" +
+"الحل: تغيير بسيط يومي + هدف صغير جداً + كسر الروتين.";
+}
+
+// 🧠 فراغ
+else if(input.includes("فراغ")){
+reply =
+"الشعور بالفراغ داخلياً صعب… كأنك موجود لكن بدون إحساس بالمعنى. " +
+"وغالباً يجي لما يكون اليوم بدون هدف أو ارتباط حقيقي.\n\n" +
+"🔹 هل عندك شيء تسويه كل يوم يعطيك معنى؟\n" +
+"🔹 أو كل يوم يمشي بدون هدف واضح؟\n\n" +
+"الحل يبدأ بهدف صغير جداً تمسكه يومياً حتى لو بسيط.";
+}
+
+// 🧠 عام
+else{
+reply =
+"أنا أسمعك… خلني أفهم أكثر، تكلم براحتك. " +
+"كل شعور تقوله له معنى، وأنا هنا أساعدك تحلله خطوة خطوة.";
+}
+
+chatBox.innerHTML += `<div class="msg-bot">${reply}</div>`;
+userInput.value="";
+}
