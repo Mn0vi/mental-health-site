@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>AI Mental Health Pro</title>
+<title>AI الصحة النفسية</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
@@ -11,37 +11,34 @@
 body{
 margin:0;
 font-family:'Cairo';
-background:linear-gradient(135deg,#1e1b4b,#312e81,#7c3aed);
+background:linear-gradient(135deg,#4f46e5,#9333ea);
 color:white;
-overflow-x:hidden;
 }
 
-/* Glass */
+/* كروت */
 .card{
 background:rgba(255,255,255,0.1);
-backdrop-filter:blur(20px);
+backdrop-filter:blur(15px);
 margin:15px;
 padding:20px;
 border-radius:20px;
-box-shadow:0 0 20px rgba(0,0,0,0.3);
 }
 
-/* زر */
+/* أزرار */
 button{
 padding:12px;
+margin:5px;
 border:none;
 border-radius:12px;
-background:linear-gradient(45deg,#6366f1,#9333ea);
+background:#6366f1;
 color:white;
 cursor:pointer;
 font-size:16px;
-transition:0.3s;
 }
-button:hover{transform:scale(1.05);}
 
 /* شات */
 .chat{
-height:350px;
+height:300px;
 overflow:auto;
 display:flex;
 flex-direction:column;
@@ -50,31 +47,24 @@ gap:10px;
 
 .msg-user{
 background:#6366f1;
-padding:12px;
+padding:10px;
 border-radius:15px;
 align-self:flex-end;
-max-width:75%;
-animation:fade 0.3s;
+max-width:70%;
 }
 
 .msg-bot{
-background:white;
+background:#fff;
 color:black;
-padding:12px;
+padding:10px;
 border-radius:15px;
 align-self:flex-start;
-max-width:75%;
-animation:fade 0.3s;
-}
-
-@keyframes fade{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;}
+max-width:70%;
 }
 
 input{
 width:70%;
-padding:12px;
+padding:10px;
 border-radius:10px;
 border:none;
 }
@@ -92,7 +82,7 @@ border-radius:10px;
 <body>
 
 <div id="login" class="card">
-<h1>🤖 AI الصحة النفسية</h1>
+<h1>🤖 منصة الصحة النفسية</h1>
 <input id="name" placeholder="اسمك">
 <input id="age" placeholder="عمرك"><br>
 <button onclick="start()">ابدأ</button>
@@ -107,7 +97,7 @@ border-radius:10px;
 <p id="q"></p>
 <div id="ans"></div>
 <button onclick="next()">التالي</button>
-<div style="background:#333"><div id="bar"></div></div>
+<div style="background:#ddd"><div id="bar"></div></div>
 </div>
 
 <div class="card">
@@ -116,12 +106,12 @@ border-radius:10px;
 </div>
 
 <div class="card">
-<h2>📅 خطتك</h2>
+<h2>📅 الخطة</h2>
 <p id="plan"></p>
 </div>
 
 <div class="card">
-<h2>💬 المستشار الذكي</h2>
+<h2>💬 المستشار</h2>
 <div id="chatBox" class="chat"></div>
 <input id="userInput" placeholder="تكلم براحتك...">
 <button onclick="sendMsg()">إرسال</button>
@@ -134,21 +124,27 @@ border-radius:10px;
 let i=0,score=0,user="";
 let sleep=0, stress=0, mood=0, confidence=0, social=0, study=0;
 
-let memory=[];
+// الأسئلة الجديدة المرتبة
+let questions = [
 
-let questions=[
-{q:"كم ساعة تنام؟",type:"sleep"},
-{q:"هل نومك مريح؟",type:"sleep"},
-{q:"هل تشعر بتوتر؟",type:"stress"},
-{q:"هل تهدأ بسهولة؟",type:"stress"},
-{q:"كيف مزاجك؟",type:"mood"},
-{q:"هل تستمتع بيومك؟",type:"mood"},
-{q:"هل تثق بنفسك؟",type:"confidence"},
-{q:"هل تهتم برأي الناس؟",type:"confidence"},
-{q:"هل تشعر بالوحدة؟",type:"social"},
-{q:"هل عندك أصدقاء؟",type:"social"},
-{q:"هل الدراسة تضغطك؟",type:"study"},
-{q:"هل تركز؟",type:"study"}
+{q:"كم ساعة تنام يومياً؟", type:"sleep_hours"},
+{q:"هل نومك مريح وتشعر بطاقة بعده؟", type:"sleep_quality"},
+
+{q:"كم مرة تشعر بالتوتر خلال الأسبوع؟", type:"stress_level"},
+{q:"هل تجد صعوبة في تهدئة نفسك؟", type:"yesno"},
+
+{q:"كيف تصف مزاجك بشكل عام؟", type:"mood_level"},
+{q:"هل تستمتع بالأنشطة اليومية؟", type:"yesno"},
+
+{q:"هل تثق بنفسك؟", type:"yesno"},
+{q:"هل تخاف من رأي الآخرين؟", type:"yesno"},
+
+{q:"هل تشعر بالوحدة؟", type:"yesno"},
+{q:"هل لديك شخص قريب تتكلم معه؟", type:"yesno"},
+
+{q:"هل الدراسة تضغطك؟", type:"yesno"},
+{q:"هل تستطيع التركيز؟", type:"yesno"}
+
 ];
 
 function start(){
@@ -160,25 +156,64 @@ loadQ();
 }
 
 function loadQ(){
-let current=questions[i];
-q.innerHTML=current.q;
 
-ans.innerHTML=`
-<button onclick="answer(2)">نعم</button>
-<button onclick="answer(1)">أحياناً</button>
-<button onclick="answer(0)">لا</button>
+let current = questions[i];
+q.innerHTML = current.q;
+
+// أنواع الإجابات
+
+if(current.type == "sleep_hours"){
+ans.innerHTML = `
+<button onclick="answer(0,'sleep')">أقل من 5 ساعات</button>
+<button onclick="answer(1,'sleep')">5-6 ساعات</button>
+<button onclick="answer(2,'sleep')">7-8 ساعات</button>
 `;
 }
 
-function answer(v){
-let t=questions[i].type;
+else if(current.type == "sleep_quality"){
+ans.innerHTML = `
+<button onclick="answer(2,'sleep')">نعم مريح</button>
+<button onclick="answer(1,'sleep')">أحياناً</button>
+<button onclick="answer(0,'sleep')">لا</button>
+`;
+}
 
-if(t=="sleep") sleep+=v;
-if(t=="stress") stress+=v;
-if(t=="mood") mood+=v;
-if(t=="confidence") confidence+=v;
-if(t=="social") social+=v;
-if(t=="study") study+=v;
+else if(current.type == "stress_level"){
+ans.innerHTML = `
+<button onclick="answer(0,'stress')">نادراً</button>
+<button onclick="answer(1,'stress')">أحياناً</button>
+<button onclick="answer(2,'stress')">كثير</button>
+`;
+}
+
+else if(current.type == "mood_level"){
+ans.innerHTML = `
+<button onclick="answer(0,'mood')">سيء</button>
+<button onclick="answer(1,'mood')">متوسط</button>
+<button onclick="answer(2,'mood')">جيد</button>
+`;
+}
+
+else{
+ans.innerHTML = `
+<button onclick="answer(2,'general')">نعم</button>
+<button onclick="answer(1,'general')">أحياناً</button>
+<button onclick="answer(0,'general')">لا</button>
+`;
+}
+
+}
+
+function answer(v,type){
+
+if(type=="sleep") sleep+=v;
+if(type=="stress") stress+=v;
+if(type=="mood") mood+=v;
+if(type=="general"){
+confidence+=v;
+social+=v;
+study+=v;
+}
 
 score+=v;
 }
@@ -190,11 +225,18 @@ if(i<12) loadQ(); else finish();
 }
 
 function finish(){
-analysis.innerHTML="📊 تم التحليل! تكلم مع AI 👇";
-plan.innerHTML="📅 بيتم إعطاؤك خطة داخل المحادثة";
+
+analysis.innerHTML = "📊 خلصت الاختبار! روح كلم المستشار 👇";
+
+plan.innerHTML = `
+📅 خطة مبدئية:<br>
+- نم بشكل منتظم 😴<br>
+- خفف الضغط 😰<br>
+- سو نشاط تحبه 🎯
+`;
 }
 
-// 🤖 AI خرافي
+// 🤖 AI يسولف
 function sendMsg(){
 
 let input=userInput.value.trim();
@@ -205,22 +247,20 @@ chatBox.innerHTML+=`<div class="msg-user">${input}</div>`;
 let text=input.toLowerCase();
 let reply="";
 
-// تحليل أعمق
-if(text.includes("توتر")||text.includes("ضغط")){
-reply="واضح إنك مضغوط 😔<br>خلنا نحدد السبب سوا… وش اللي مضايقك أكثر؟";
+if(text.includes("توتر")){
+reply="واضح إنك مضغوط 😔<br>وش أكثر شي مضايقك؟";
 }
 else if(text.includes("حزين")){
-reply="الحزن واضح من كلامك 💔<br>أنا معك، احكي لي وش اللي صاير؟";
+reply="أفهمك 💔<br>تحب تحكي لي السبب؟";
 }
-else if(text.includes("وحده")){
-reply="الوحدة شعور صعب 🤍<br>تحس إن مافيه أحد فاهمك؟";
+else if(text.includes("نوم")){
+reply="نومك مهم 😴<br>هل تسهر كثير؟";
 }
 else{
-reply="أنا هنا معك 👌<br>خذ راحتك بالكلام، وش حاب تقول؟";
+reply="أنا معك 👌<br>احكي لي أكثر";
 }
 
-// نصيحة ذكية
-reply+=`<br><br>💡 جرب اليوم:<br>- خذ وقت لنفسك<br>- تنفس بعمق<br>- لا تضغط نفسك`;
+reply+="<br><br>💡 نصيحتي: خذ وقت لنفسك واهدأ شوي";
 
 chatBox.innerHTML+=`<div class="msg-bot">${reply}</div>`;
 
